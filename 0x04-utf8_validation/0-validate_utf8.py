@@ -1,32 +1,28 @@
 #!/usr/bin/python3
-"""UTF-8 validation function"""
+"""
+UTF-8 Validation
+"""
 
 
-def validUTF8(data):
-    """Validate utf8"""
-    def validate_sequence(i):
-        """Validate sequence"""
-        if len(data) < i:
-            return False
-        for _ in range(i):
-            if not data.pop().startswith("10"):
-                return False
-        return True
-
-    data = [format(seq, '08b') for seq in reversed(data)]
-    while data:
-        seq = data.pop()
-        if seq.startswith("0"):
-            continue
-        if seq.startswith("110"):
-            if not validate_sequence(1):
-                return False
-        elif seq.startswith("1110"):
-            if not validate_sequence(2):
-                return False
-        elif seq.startswith("11110"):
-            if not validate_sequence(3):
+def validUTF8(data) -> bool:
+    """
+    Returns True if data is a valid UTF-8 encoding, else return False
+    :param data:
+    :return:
+    """
+    num_bytes = 0
+    for byte in data:
+        mask = 1 << 7
+        if not num_bytes:
+            while byte & mask:
+                num_bytes += 1
+                mask >>= 1
+            if not num_bytes:
+                continue
+            if num_bytes == 1 or num_bytes > 4:
                 return False
         else:
-            return False
-    return True
+            if byte >> 6 != 0b10:
+                return False
+        num_bytes -= 1
+    return num_bytes == 0
