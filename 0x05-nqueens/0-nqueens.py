@@ -1,90 +1,125 @@
 #!/usr/bin/python3
-'''N-Queens Challenge'''
-
-import sys
-
-
-def is_safe(placed_queens, row, col):
-    for cord in placed_queens:
-        if (
-            cord[1] == col
-            or cord[1] + (row - cord[0]) == col
-            or cord[1] - (row - cord[0]) == col
-        ):
-            return False
-    return True
+""" A program that solves the N queens problem
+"""
+from sys import argv
 
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
+def check_row(board, index, board_len):
+    """ Check if there is a queen in the row """
+    for r in range(board_len):
+        if board[index][r]:
+            return (False)
+
+    return (True)
+
+
+def check_r_angle(board, row, col, board_len):
+    """ Check if there is a queen in the left angle """
+    c = col
+    for r in range(row, -1, -1):
+        if c >= board_len:
+            break
+        if board[r][c]:
+            return (False)
+        c += 1
+
+    c = col
+    for r in range(row, board_len):
+        if c < 0:
+            break
+        if board[r][c]:
+            return (False)
+        c -= 1
+
+    return (True)
+
+
+def check_l_angle(board, row, col, board_len):
+    """ Check if there is a queen in the right angle """
+    c = col
+    for r in range(row, -1, -1):
+        if c < 0:
+            break
+        if board[r][c]:
+            return (False)
+        c -= 1
+
+    c = col
+    for r in range(row, board_len):
+        if c >= board_len:
+            break
+        if board[r][c]:
+            return (False)
+        c += 1
+
+    return (True)
+
+
+def chek_all(board, r, c, n):
+    if not check_row(board, r, n):
+        return (False)
+
+    if not check_l_angle(board, r, c, n):
+        return (False)
+
+    return (check_r_angle(board, r, c, n))
+
+
+def main():
+    """ The Main Function """
+
+    argc = len(argv)
+    if argc != 2:
         print("Usage: nqueens N")
-        sys.exit(1)
+        exit(1)
 
     try:
-        n = int(sys.argv[1])
-    except ValueError:
-        print('N must be a number')
+        n = int(argv[1])
+    except Exception:
+        print("N must be a number")
         exit(1)
 
     if n < 4:
-        print('N must be at least 4')
+        print("N must be at least 4")
         exit(1)
 
-    solutions = []
-    placed_queens = []  # coordinates format [row, column]
-    stop = False
-    r = 0
+    n_range = range(n)
+    i = 0
     c = 0
+    r = i
+    board = [[0 for _ in n_range] for _ in n_range]
+    result = []
+    while i < n:
+        while (c < n):
+            found = 0
 
-    while r < n:
-        goback = False
-
-        while c < n:
-            if not is_safe(placed_queens, r, c):
-                if c == n - 1:
-                    goback = True
+            while (r < n):
+                if chek_all(board, r, c, n):
+                    board[r][c] = 1
+                    result.append([c, r])
+                    found = 1
+                    r = 0
                     break
-                c += 1
+                r += 1
+
+            if not found and len(result):
+                last_i = result.pop()
+                c = last_i[0]
+                r = last_i[1] + 1
+                board[last_i[1]][last_i[0]] = 0
                 continue
+            c += 1
 
-            cords = [r, c]
-            placed_queens.append(cords)
-
-            if r == n - 1:
-                solutions.append(placed_queens[:])
-                for cord in placed_queens:
-                    if cord[1] < n - 1:
-                        r = cord[0]
-                        c = cord[1]
-                for i in range(n - r):
-                    placed_queens.pop()
-                if r == n - 1 and c == n - 1:
-                    placed_queens = []
-                    stop = True
-                r -= 1
-                c += 1
-            else:
-                c = 0
-            break
-
-        if stop:
-            break
-
-        if goback:
-            r -= 1
-            while r >= 0:
-                c = placed_queens[r][1] + 1
-                del placed_queens[r]
-                if c < n:
-                    break
-                r -= 1
-            if r < 0:
-                break
-            continue
-        r += 1
-
-    for idx, val in enumerate(solutions):
-        if idx == len(solutions) - 1:
-            print(val, end='')
+        if len(result):
+            print(result)
+            i = result[0][1]
+            last_i = result.pop()
+            c = last_i[0]
+            r = last_i[1] + 1
+            board[last_i[1]][last_i[0]] = 0
         else:
-            print(val)
+            return
+
+
+if __name__ == "__main__":
+    main()
