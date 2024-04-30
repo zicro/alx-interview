@@ -1,18 +1,23 @@
 #!/usr/bin/python3
-"""Making change"""
+"""
+Main file for testing
+"""
 
 
-def makeChange(coins, total):
-    """making change"""
-    if total <= 0:
+def makeChange(coins, amount):
+    """
+    How many of this type of coin can I get with my money? Okay,
+        I'll take that many. Now, how much money do I have left?
+        And how many coins do I have in my pocket?
+    """
+    if amount < 1:
         return 0
-
-    dp = [float('inf')] * (total + 1)
-    dp[0] = 0
-
-    for i in range(1, total + 1):
-        for coin in coins:
-            if i >= coin:
-                dp[i] = min(dp[i], dp[i - coin] + 1)
-
-    return dp[total] if dp[total] != float('inf') else -1
+    coins.sort(reverse=True)
+    count = 0
+    for coin in coins:
+        if amount == 0:
+            break
+        num = amount // coin
+        amount -= num * coin
+        count += num
+    return count if amount == 0 else -1
